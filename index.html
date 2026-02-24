@@ -147,6 +147,39 @@ partial interface MediaDevices {
               </li>
               <li>
                 <p>
+                  If the [=relevant global object=]'s [=associated `Document`=] is NOT [=Document/fully active=] or does
+                  NOT <a data-cite="!HTML/#gains-focus">have focus</a>, return a promise [=reject|rejected=] with a
+                  {{DOMException}} object whose {{DOMException/name}} attribute has the value {{InvalidStateError}}.
+                </p>
+              </li>
+              <li>
+                <p>
+                  Let <var>browsing context</var> be [=relevant global object=]'s [=associated `Document`=]'s
+                  [=top-level browsing context=]
+                </p>
+              </li>
+              <li>
+                <p>
+                  Return the result of [=get media stream promise=] with <var>browsing context</var>,
+                  <var>options</var> and <code>false</code>.
+                </p>
+              </li>
+            </ol>
+            <p>
+              The <a>user agent</a> MUST NOT capture content that's behind a partially transparent captured
+              <a data-cite="SCREEN-CAPTURE#dfn-display-surface">display surface</a>.
+            </p>
+            <p>
+              The <a>user agent</a> MUST NOT share the audio other than audio emitted from the captured tab, and MUST
+              NOT share audio of the entire system.
+            </p>
+            <p>
+              To <dfn class="abstract-op" id="get-media-stream-promise">get media stream promise</dfn> with
+              <var>browsingContext</var>, <var>options</var>, <var>automation</var> run the following steps:
+            </p>
+            <ol>
+              <li>
+                <p>
                   If <code>options.video</code> is <code>false</code>, return a promise [=reject|rejected=] with a newly
                   [=exception/created=] {{TypeError}}.
                 </p>
@@ -192,13 +225,6 @@ partial interface MediaDevices {
                 </p>
               </li>
               <li>
-                <p>
-                  If the [=relevant global object=]'s [=associated `Document`=] is NOT [=Document/fully active=] or does
-                  NOT <a data-cite="!HTML/#gains-focus">have focus</a>, return a promise [=reject|rejected=] with a
-                  {{DOMException}} object whose {{DOMException/name}} attribute has the value {{InvalidStateError}}.
-                </p>
-              </li>
-              <li>
                 <p>Let <var>p</var> be a new promise.</p>
               </li>
               <li>
@@ -216,8 +242,8 @@ partial interface MediaDevices {
                       <li>
                         <p>
                           Read the current [= permission state=] for obtaining sources of type <var>T</var> in the
-                          current browsing context. If the permission state is {{PermissionState/"denied"}}, jump to the
-                          step labeled <em>PermissionFailure</em> below.
+                          <var>browsing context</var>. If the permission state is {{PermissionState/"denied"}}, jump to
+                          the step labeled <em>PermissionFailure</em> below.
                         </p>
                       </li>
                     </ol>
@@ -230,29 +256,30 @@ partial interface MediaDevices {
                   </li>
                   <li>
                     <p>
-                      [=Request permission to use=] viewport capture, for a {{PermissionDescriptor}} with its
-                      {{PermissionDescriptor/name}} set to <a>"viewport-capture"</a>, resulting in a set of provided
-                      media.
+                      If <var>automation</var> is <code>true</code>, let <var>permission state</var> be
+                      {{PermissionState/"granted"}}.
+                    </p>
+                    <p>
+                      Otherwise, let <var>permission state</var> be the result of [=request permission to use=] viewport
+                      capture, for a {{PermissionDescriptor}} with its {{PermissionDescriptor/name}} set to
+                      <a>"viewport-capture"</a>, resulting in a set of provided media.
                     </p>
                     <p>
                       The provided media MUST include precisely one video track, which MUST be a live-capture of the
                       <a data-cite="SCREEN-CAPTURE#dfn-browser">browser</a>
                       <a data-cite="SCREEN-CAPTURE#dfn-display-surface">display surface</a>
-                      of the [=relevant global object=]'s [=associated `Document`=]'s [=top-level browsing context=]'s
-                      <a data-cite="HTML#viewport">viewport</a>.
+                      of the <var>browsing context</var>'s <a data-cite="HTML#viewport">viewport</a>.
                     </p>
                     <p>
                       The provided media MUST include at most one audio track, which, if provided, MUST be the combined
-                      audio produced by the sum of documents that consist of the [=relevant global object=]'s
-                      [=associated `Document`=]'s [=top-level browsing context=]'s [=navigable/active document=], and
-                      all [=navigable/active documents=] in nested [=browsing context=]s of the [=relevant global
-                      object=]'s [=associated `Document`=]'s [=top-level browsing context=]. This audio track MUST NOT
-                      be included if audio was not specified in <var>requestedMediaTypes</var>, or if it was specified
-                      as <code>false</code>.
+                      audio produced by the sum of documents that consist of the <var>browsing context</var>'s
+                      [=navigable/active document=], and all [=navigable/active documents=] in nested [=browsing
+                      context=]s of the <var>browsing context</var>. This audio track MUST NOT be included if audio was
+                      not specified in <var>requestedMediaTypes</var>, or if it was specified as <code>false</code>.
                     </p>
                     <p>The source of a {{MediaStreamTrack}} MUST NOT change.</p>
                     <p>
-                      If the result of the request is {{PermissionState/"granted"}}, then for each device that is
+                      If <var>permission state</var> is {{PermissionState/"granted"}}, then for each device that is
                       sourcing the provided media, using a stable and private id for the device, <var>deviceId</var>,
                       set [[\devicesLiveMap]]<var>[deviceId]</var> to <code>true</code>, if it isn’t already
                       <code>true</code>, and set the [[\devicesAccessibleMap]]<var>[deviceId]</var> to
@@ -260,7 +287,7 @@ partial interface MediaDevices {
                     </p>
                     <p>The user agent MUST NOT store a {{PermissionState/"granted"}} permission entry.</p>
                     <p>
-                      If the result is {{PermissionState/"denied"}}, jump to the step labeled
+                      If <var>permission state</var> is {{PermissionState/"denied"}}, jump to the step labeled
                       <em>Permission Failure</em> below. If the user never responds, this algorithm stalls on this step.
                     </p>
                     <p>
@@ -269,9 +296,9 @@ partial interface MediaDevices {
                       attribute has the value {{NotReadableError}} and abort these steps.
                     </p>
                     <p>
-                      If the result is {{PermissionState/"granted"}} but device access fails for any reason other than
-                      those listed above, <a>reject</a> <var>p</var> with a new {{DOMException}} object whose
-                      {{DOMException/name}} attribute has the value {{AbortError}} and abort these steps.
+                      If <var>permission state</var> is {{PermissionState/"granted"}} but device access fails for any
+                      reason other than those listed above, <a>reject</a> <var>p</var> with a new {{DOMException}}
+                      object whose {{DOMException/name}} attribute has the value {{AbortError}} and abort these steps.
                     </p>
                   </li>
                   <li>
@@ -305,14 +332,6 @@ partial interface MediaDevices {
                 <p>Return <var>p</var>.</p>
               </li>
             </ol>
-            <p>
-              The <a>user agent</a> MUST NOT capture content that's behind a partially transparent captured
-              <a data-cite="SCREEN-CAPTURE#dfn-display-surface">display surface</a>.
-            </p>
-            <p>
-              The <a>user agent</a> MUST NOT share the audio other than audio emitted from the captured tab, and MUST
-              NOT share audio of the entire system.
-            </p>
           </dd>
         </dl>
       </section>
@@ -379,6 +398,39 @@ partial interface MediaDevices {
         are not adhered to.
       </p>
       <p>TBD.</p>
+    </section>
+    <section>
+      <h2 id="automation">Automation</h2>
+      <p>
+        The <dfn class="export">capture a browsing context viewport</dfn> algorithm is used to capture a top-level
+        browsing context viewport for browser automation purposes, such as by [[WEBDRIVER-BIDI]].
+      </p>
+      <p>Given a <var>browsingContext</var> and <var>options</var>, run the following steps:</p>
+      <ol>
+        <li>
+          <p>
+            Let <var>requestedMediaTypes</var> be the set of media types in <var>options</var> with either a dictionary
+            value or a value of <code>true</code>.
+          </p>
+        </li>
+        <li>
+          <p>For each media type <var>T</var> in <var>requestedMediaTypes</var>,</p>
+          <ol>
+            <li>
+              <p>
+                [=Set a permission=] for obtaining sources with a {{PermissionDescriptor}} with its
+                {{PermissionDescriptor/name}} set to <var>T</var> and {{PermissionState/"granted"}}.
+              </p>
+            </li>
+          </ol>
+        </li>
+        <li>
+          <p>
+            Return the result of [=get media stream promise=] with <var>browsing context</var>, <var>options</var> and
+            <code>true</code>.
+          </p>
+        </li>
+      </ol>
     </section>
   </body>
 </html>
