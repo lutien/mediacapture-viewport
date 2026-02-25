@@ -241,9 +241,10 @@ partial interface MediaDevices {
                       </li>
                       <li>
                         <p>
-                          Read the current [= permission state=] for obtaining sources of type <var>T</var> in the
-                          <var>browsing context</var>. If the permission state is {{PermissionState/"denied"}}, jump to
-                          the step labeled <em>PermissionFailure</em> below.
+                          If <var>automation</var> is <code>false</code>, read the current [= permission state=] for
+                          obtaining sources of type <var>T</var> in the <var>browsing context</var>. If the permission
+                          state is {{PermissionState/"denied"}}, jump to the step labeled
+                          <em>PermissionFailure</em> below.
                         </p>
                       </li>
                     </ol>
@@ -407,23 +408,6 @@ partial interface MediaDevices {
       </p>
       <p>Given a <var>browsingContext</var> and <var>options</var>, run the following steps:</p>
       <ol>
-        <li>
-          <p>
-            Let <var>requestedMediaTypes</var> be the set of media types in <var>options</var> with either a dictionary
-            value or a value of <code>true</code>.
-          </p>
-        </li>
-        <li>
-          <p>For each media type <var>T</var> in <var>requestedMediaTypes</var>,</p>
-          <ol>
-            <li>
-              <p>
-                [=Set a permission=] for obtaining sources with a {{PermissionDescriptor}} with its
-                {{PermissionDescriptor/name}} set to <var>T</var> and {{PermissionState/"granted"}}.
-              </p>
-            </li>
-          </ol>
-        </li>
         <li>
           <p>
             Return the result of [=get media stream promise=] with <var>browsing context</var>, <var>options</var> and
