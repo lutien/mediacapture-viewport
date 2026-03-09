@@ -174,8 +174,8 @@ partial interface MediaDevices {
               NOT share audio of the entire system.
             </p>
             <p>
-              To <dfn class="abstract-op" id="get-media-stream-promise">get media stream promise</dfn> with
-              <var>browsingContext</var>, <var>options</var>, <var>automation</var> run the following steps:
+              To <dfn class="abstract-op" id="get-media-stream-promise">get media stream promise</dfn> given
+              <var>browsing context</var>, <var>options</var>, <var>automation</var> run the following steps:
             </p>
             <ol>
               <li>
@@ -406,7 +406,7 @@ partial interface MediaDevices {
         The <dfn class="export">capture a browsing context viewport</dfn> algorithm is used to capture a top-level
         browsing context viewport for browser automation purposes, such as by [[WEBDRIVER-BIDI]].
       </p>
-      <p>Given a <var>browsingContext</var> and <var>options</var>, run the following steps:</p>
+      <p>Given <var>browsing context</var> and <var>options</var>, run the following steps:</p>
       <ol>
         <li>
           <p>
